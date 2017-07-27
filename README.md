@@ -20,6 +20,174 @@ Parallel SCSI (SPI) là interface đầu tiên của chuẩn này, sau đó có 
  
  Không như Fibre Channel phải sử dụng cáp chuyên biệt, iSCSI có thể chạy trên khoảng cách xa bằng cách sử dụng hạ tầng mạng hiện có.
 
-## 2.Hoạt động của iSCSI
-
 iSCSI cho phép 2 host trao đổi các SCSI command sử dụng mạng IP. Bằng cách này, iSCSI có một bus local storage với hiệu năng cao trên một phạm vi rộng tạo thành một mạng SAN. 
+
+Mặc dù iSCSI có thể truyền thông giữa các thiết bị SCSI với nhau, nhưng các admin system hầu hết sử dụng để cho phép các các server truy cập disk volume trên storage array. 
+
+iSCSI SAN thường có 1 trong 2 mục đích :
+
+- Storage consolidation : Tài nguyên storage từ các server sẽ được tập trung lại, điều này cho phép cấp phát storage hiệu quả hơn. Trong môi trường SAN, một server có thể cấp phát một disk volume mới mà không có bất cứ thay đổi nào về phần cứng và dây cáp.
+- Disaster recovery : Sao lưu storage từ một data center này tới một data center khác. Đặc biệt, iSCSI SAN cho phép disk array migrate qua WAN với sự thay đổi cấu hình tối thiểu, làm cho storage có khả năng định tuyến giống như network traffic.
+
+## Cấu hình iSCSI Target (targetcli)
+
+Một stprage trên network gọi là iSCSI target, một client kết nối tới iSCSI target gọi là iSCSI initiator.
+
++----------------------+          |          +----------------------+
+| [   iSCSI Target   ] |10.0.0.8  | 10.0.0.9 | [ iSCSI Initiator  ] |
+|     target.loc.vu     +----------+----------+     www.loc.vu    |
+|                      |                     |                      |
++----------------------+                     +----------------------+
+
+```
+# apt-get -y install iscsitarget iscsitarget-dkms
+# mkdir /var/iscsi_disks 
+# dd if=/dev/zero of=/var/iscsi_disks/disk01.img count=0 bs=1 seek=10G
+
+```
+
+Edit file cấu hình 
+
+```
+# vi /etc/default/iscsitarget
+```
+```
+ISCSITARGET_ENABLE=true
+``` 
+
+```
+# vi /etc/iet/ietd.conf
+```
+```
+Target iqn.2017-07.loc.vu:target00
+    # provided devicce as a iSCSI target
+    Lun 0 Path=/var/iscsi_disks/disk01.img,Type=fileio
+    # iSCSI Initiator's IP address you allow to connect
+    initiator-address 10.0.0.9
+    # authentication info ( set anyone you like for "username", "password" )
+    incominguser admin admin 
+```	
+
+Restart lại dịch vụ 
+
+```
+# systemctl restart iscsitarget
+```
+
+Check status
+```
+# ietadm --op show --tid=1 
+Wthreads=8
+Type=0
+QueuedCommands=32
+NOPInterval=0
+NOPTimeout=0
+``` 
+
+## Cấu hình iSCSI Initiator (Ubuntu)
+
+```
+# apt-get -y install open-iscsi
+```
+
+Edit file config 
+
+```
+# vi /etc/iscsi/initiatorname.iscsi
+```
+
+```
+InitiatorName=iqn.2017-07.vu.loc:www.loc.vu
+```
+
+```
+# vi /etc/iscsi/iscsid.conf
+```
+
+Uncomment line 53
+
+```
+node.session.auth.authmethod = CHAP
+```
+
+Line 57, 58
+
+```
+node.session.auth.username = admin
+node.session.auth.password = admin
+```
+
+Restart service 
+
+```
+# systemctl restart iscsid open-iscsi
+```
+
+Discover target
+
+```
+# iscsiadm -m discovery -t sendtargets -p 10.0.0.8
+10.0.0.8:3260,1 iqn.2017-07.vu.loc:target00
+```
+
+Confirm status after discovery
+
+```
+# iscsiadm -m node -o show 
+node.name = iqn.2017-07.vu.loc:target00
+node.tpgt = 1
+node.startup = manual
+node.leading_login = No
+...
+...
+node.conn[0].iscsi.IFMarker = No
+node.conn[0].iscsi.OFMarker = No
+# END RECORD
+```
+
+Login to the target 
+
+```
+# iscsiadm -m node --login 
+Logging in to [iface: default, target: iqn.2017-07.vu.loc:target00, portal: 10.0.0.8,3260] (multiple)
+Login to [iface: default, target: iqn.2017-07.vu.loc:target00, portal: 10.0.0.8,3260] successful.
+```
+
+Confirm the established session
+```
+# iscsiadm -m session -o show 
+tcp: [1] 10.0.0.8:3260,1 iqn.2017-07.vu.loc:target00 (non-flash)
+````
+
+Confirm the partitions
+
+```
+# cat /proc/partitions 
+major minor  #blocks  name
+
+  11        0       1152 sr0
+   2        0          4 fd0
+   8        0   31457280 sda
+   8        1   31456239 sda1
+   8       16    7340032 sdb
+   8       17    7338944 sdb1
+   8       32   10485760 sdc
+```
+
+Ta có thể thấy một thiết bị mới được thêm vào từ server target (/sdc)
+
+Cấu hình trên Initiator để sử dụng /sdc 
+
+```
+# parted --script /dev/sdc "mklabel msdos" 
+# parted --script /dev/sdc "mkpart primary 0% 100%" 
+# mkfs.ext4 /dev/sdc1 
+# mount /dev/sdc1 /mnt 
+# df -hT 
+/dev/sdc1      ext4      9.8G   23M  9.2G   1% /mnt
+```
+
+## Cấu hình iSCSI Initiator (Windows)
+
+Xem tại https://www.server-world.info/en/note?os=Ubuntu_16.04&p=iscsi&f=4
+
