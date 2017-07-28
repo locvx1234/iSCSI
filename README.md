@@ -33,11 +33,13 @@ iSCSI SAN thường có 1 trong 2 mục đích :
 
 Một stprage trên network gọi là iSCSI target, một client kết nối tới iSCSI target gọi là iSCSI initiator.
 
+```
 +----------------------+          |          +----------------------+
 | [   iSCSI Target   ] |10.0.0.8  | 10.0.0.9 | [ iSCSI Initiator  ] |
 |     target.loc.vu     +----------+----------+     www.loc.vu    |
 |                      |                     |                      |
 +----------------------+                     +----------------------+
+```
 
 ```
 # apt-get -y install iscsitarget iscsitarget-dkms
@@ -214,6 +216,8 @@ Sau đó chọn Yes khi có hộp thoại xuất hiện
 Điền IP Target sau đó chọn Quick Connect...
 
 ![Quick Connect](https://github.com/locvx1234/iSCSI/blob/master/images/quick_connect.png)
+
+![]()
 
 Click Connect 
 
