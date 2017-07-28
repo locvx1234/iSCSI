@@ -189,10 +189,14 @@ Cấu hình trên Initiator để sử dụng /sdc
 
 ## Cấu hình iSCSI Initiator (Windows)
 
-**Note** Trong file `vi /etc/iet/ietd.conf` của Targer, sửa lại tham số
+Trong file `vi /etc/iet/ietd.conf` của server Targer, sửa lại tham số
+
 ```
 initiator-address 10.0.0.0/24
 ```
+
+Mặc định là ALL
+
 Sau đó restart lại dịch vụ : 
 
 ```
@@ -203,22 +207,30 @@ Trên Windows (Initiator) :
 
 Vào Control Panel, chọn iSCSI Initiator
 
-Sau đó chọn Yes khi có hộp thoại xuất hiện
+![iSCSI Initiator](https://github.com/locvx1234/iSCSI/blob/master/images/iSCSI_Initiator.png)
 
+Sau đó chọn Yes khi có hộp thoại xuất hiện
 
 Điền IP Target sau đó chọn Quick Connect...
 
+![Quick Connect](https://github.com/locvx1234/iSCSI/blob/master/images/quick_connect.png)
 
 Click Connect 
 
+![Connect](https://github.com/locvx1234/iSCSI/blob/master/images/connect.png)
+
 Click Advanced...  
 
+![Advanced](https://github.com/locvx1234/iSCSI/blob/master/images/advance.png)
+
 Check vào ô `Enable CHAP log on` sau đó điền username và password như cấu hình phía Target
+
+![CHAP](https://github.com/locvx1234/iSCSI/blob/master/images/CHAP.png)
 
 **Note** Password phải tối thiểu 12 ký tự 
 
 Chạy `diskmgmt.msc`, một disk đã được attack
 
-
+![disk](https://github.com/locvx1234/iSCSI/blob/master/images/disk.png)
 
 
