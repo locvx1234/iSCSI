@@ -189,5 +189,36 @@ Cấu hình trên Initiator để sử dụng /sdc
 
 ## Cấu hình iSCSI Initiator (Windows)
 
-Xem tại https://www.server-world.info/en/note?os=Ubuntu_16.04&p=iscsi&f=4
+**Note** Trong file `vi /etc/iet/ietd.conf` của Targer, sửa lại tham số
+```
+initiator-address 10.0.0.0/24
+```
+Sau đó restart lại dịch vụ : 
+
+```
+systemctl restart iscsitarget
+```
+
+Trên Windows (Initiator) :
+
+Vào Control Panel, chọn iSCSI Initiator
+
+Sau đó chọn Yes khi có hộp thoại xuất hiện
+
+
+Điền IP Target sau đó chọn Quick Connect...
+
+
+Click Connect 
+
+Click Advanced...  
+
+Check vào ô `Enable CHAP log on` sau đó điền username và password như cấu hình phía Target
+
+**Note** Password phải tối thiểu 12 ký tự 
+
+Chạy `diskmgmt.msc`, một disk đã được attack
+
+
+
 
