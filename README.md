@@ -29,14 +29,14 @@ iSCSI SAN thường có 1 trong 2 mục đích :
 - Storage consolidation : Tài nguyên storage từ các server sẽ được tập trung lại, điều này cho phép cấp phát storage hiệu quả hơn. Trong môi trường SAN, một server có thể cấp phát một disk volume mới mà không có bất cứ thay đổi nào về phần cứng và dây cáp.
 - Disaster recovery : Sao lưu storage từ một data center này tới một data center khác. Đặc biệt, iSCSI SAN cho phép disk array migrate qua WAN với sự thay đổi cấu hình tối thiểu, làm cho storage có khả năng định tuyến giống như network traffic.
 
-## Cấu hình iSCSI Target (targetcli)
+## Cấu hình iSCSI Target 
 
 Một stprage trên network gọi là iSCSI target, một client kết nối tới iSCSI target gọi là iSCSI initiator.
 
 ```
 +----------------------+          |          +----------------------+
 | [   iSCSI Target   ] |10.0.0.8  | 10.0.0.9 | [ iSCSI Initiator  ] |
-|     target.loc.vu     +----------+----------+     www.loc.vu    |
+|     target.loc.vu    +----------+----------+     www.loc.vu       |
 |                      |                     |                      |
 +----------------------+                     +----------------------+
 ```
@@ -217,7 +217,7 @@ Sau đó chọn Yes khi có hộp thoại xuất hiện
 
 ![Quick Connect](https://github.com/locvx1234/iSCSI/blob/master/images/quick_connect.png)
 
-![]()
+![Quick Connect 2](https://github.com/locvx1234/iSCSI/blob/master/images/quick_connect2.png)
 
 Click Connect 
 
@@ -231,7 +231,7 @@ Check vào ô `Enable CHAP log on` sau đó điền username và password như c
 
 ![CHAP](https://github.com/locvx1234/iSCSI/blob/master/images/CHAP.png)
 
-**Note** Password phải tối thiểu 12 ký tự 
+**Note** Password phải tối thiểu 12 ký tự (hình trên mình để password admin thì sinh lỗi)
 
 Chạy `diskmgmt.msc`, một disk đã được attack
 
